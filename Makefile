@@ -88,9 +88,14 @@ docker-build: test ## Build docker image with the manager.
 docker-push: DOCKER_BUILD_ARGS=--push #--platform linux/arm64/v8,linux/amd64
 docker-push: docker-build
 
+.PHONY: artifact-push
+artifact-push:
+	flux push artifact oci://ghcr.io/makkes/manifests/trello-controller:$(IMG_TAG) --path=./config/ --source=https://github.com/makkes/trello-contriller --revision=$(IMG_TAG)/$(git rev-parse HEAD)
+
 .PHONY: release
 release: IMG_TAG=$(shell echo "$$(git describe --tags "$$(git rev-parse "HEAD^{commit}")^{commit}" --match v* 2>/dev/null || git rev-parse "HEAD^{commit}")$$([ -z "$$(git status --porcelain 2>/dev/null)" ] || echo -dirty)")
 release: docker-push
+release: artifact-push
 
 ##@ Deployment
 
