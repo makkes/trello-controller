@@ -1,6 +1,6 @@
 # Trello Controller
 
-This repository hosts a Kubernetes controller reflecting application workloads on a specific Trello board for simple insight.
+A Kubernetes controller reflecting application workloads on a specific Trello board for simple insight into their health.
 
 ## Prerequisites
 
