@@ -30,7 +30,7 @@ type TrelloReconciler struct {
 	trelloListID string
 }
 
-func NewTrelloReconciler(apiKey, apiToken, trelloListID string, c client.Client) *TrelloReconciler {
+func NewTrelloReconciler(apiKey, apiToken, trelloListID, targetAPIVersion, targetKind string, c client.Client) *TrelloReconciler {
 	hc := retryablehttp.NewClient()
 
 	hc.HTTPClient.Timeout = 15 * time.Second
@@ -46,8 +46,8 @@ func NewTrelloReconciler(apiKey, apiToken, trelloListID string, c client.Client)
 		target: metav1.TypeMeta{
 			// APIVersion: "kustomize.toolkit.fluxcd.io/v1beta2",
 			// Kind:       "Kustomization",
-			APIVersion: "apps/v1",
-			Kind:       "Deployment",
+			APIVersion: targetAPIVersion,
+			Kind:       targetKind,
 		},
 		trelloListID: trelloListID,
 	}
