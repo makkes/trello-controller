@@ -109,16 +109,19 @@ func (r *TrelloReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 	}
 
-	ready, err := r.isReady(ctx, req.NamespacedName)
+	targetStatus, err := r.computeStatus(ctx, req.NamespacedName)
 	if err != nil {
 		return ctrl.Result{}, fmt.Errorf("failed checking ready state: %w", err)
 	}
 
 	nameWithoutIndicator := strings.Split(card.Name, " ")[0]
-	if ready {
+	switch targetStatus {
+	case status.CurrentStatus:
 		card.Name = nameWithoutIndicator + " ✅"
-	} else {
+	case status.FailedStatus, status.NotFoundStatus, status.TerminatingStatus:
 		card.Name = nameWithoutIndicator + " ❌"
+	case status.InProgressStatus, status.UnknownStatus:
+		card.Name = nameWithoutIndicator + " ⌛"
 	}
 
 	if card.ID != "" {
@@ -147,19 +150,19 @@ func (r *TrelloReconciler) getResource(ctx context.Context, n types.NamespacedNa
 	return target, nil
 }
 
-func (r *TrelloReconciler) isReady(ctx context.Context, n types.NamespacedName) (bool, error) {
+func (r *TrelloReconciler) computeStatus(ctx context.Context, n types.NamespacedName) (status.Status, error) {
 	target := &unstructured.Unstructured{}
 	target.SetGroupVersionKind(r.target.GroupVersionKind())
 	if err := r.c.Get(ctx, n, target); err != nil {
-		return false, fmt.Errorf("unable to get resource %s: %w", n.String(), err)
+		return "", fmt.Errorf("unable to get resource %s: %w", n.String(), err)
 	}
 
 	res, err := status.Compute(target)
 	if err != nil {
-		return false, fmt.Errorf("unable to compute status: %w", err)
+		return "", fmt.Errorf("unable to compute status: %w", err)
 	}
 
-	return res.Status == status.CurrentStatus, nil
+	return res.Status, nil
 
 }
 
