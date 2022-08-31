@@ -90,7 +90,6 @@ docker-push: docker-build
 
 .PHONY: artifact-push
 artifact-push:
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	flux push artifact oci://ghcr.io/makkes/manifests/trello-controller:$(IMG_TAG) --path=./config/ --source=https://github.com/makkes/trello-contriller --revision=$(IMG_TAG)/$(git rev-parse HEAD)
 
 .PHONY: release
