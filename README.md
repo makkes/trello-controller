@@ -25,3 +25,10 @@ Installation consists of 2 steps: Installing the trello-controller and creating 
    ```
 
 As soon as the pod gets ready you should see all the Kustomizations on the cluster reflected on the given Trello list.
+
+## Releasing a new Version
+
+1. edit `config/manager/kustomization.yaml` and set `newTag` to the new tag.
+1. create the tag: `git tag -sam TAG TAG`
+1. push the tag: `git push origin TAG`
+1. build and push docker image and OCI artifact: `make release`
