@@ -14,7 +14,7 @@ Installation consists of 2 steps: Installing the trello-controller and creating 
 
    ```sh
    flux create source oci trello-controller --url=oci://ghcr.io/makkes/manifests/trello-controller --tag=v0.0.2 --interval=10m
-   flux create ks trello-controller --source=OCIRepository/trello-controller --path=./config/default
+   flux create ks trello-controller --source=OCIRepository/trello-controller --path=./config/default --interval=1h
 
 1. Create Secret with Trello credentials
    
@@ -25,6 +25,10 @@ Installation consists of 2 steps: Installing the trello-controller and creating 
    ```
 
 As soon as the pod gets ready you should see all the Deployments on the cluster reflected on the given Trello list.
+
+## Configuration
+
+The type of resource that the controller watches and reflects on your Trello board is configurable. The default is to list all Deployments. In order to change the target type you'll need to patch the Kustomization to (1) configure the controller itself and (2) configure proper RBAC rules. Please see the [example Kustomization manifest](config/examples/watch-kustomizations.yaml) for how to do this.
 
 ## Releasing a new Version
 
