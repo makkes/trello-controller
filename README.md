@@ -13,7 +13,7 @@ Installation consists of 2 steps: Installing the trello-controller and creating 
 1. Install the trello-controller
 
    ```sh
-   flux create source oci trello-controller --url=oci://ghcr.io/makkes/manifests/trello-controller --tag=v0.0.2 --interval=10m
+   flux create source oci trello-controller --url=oci://ghcr.io/makkes/manifests/trello-controller --tag-semver=* --interval=10m
    flux create ks trello-controller --source=OCIRepository/trello-controller --path=./config/default --interval=1h
 
 1. Create Secret with Trello credentials
