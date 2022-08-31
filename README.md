@@ -24,7 +24,7 @@ Installation consists of 2 steps: Installing the trello-controller and creating 
    kubectl -n trello-system create secret generic trello-credentials --from-literal=api-key=YOUR_API_KEY --from-literal=api-token=YOUR_API_TOKEN --from-literal=list-id=YOUR_LIST_ID
    ```
 
-As soon as the pod gets ready you should see all the Kustomizations on the cluster reflected on the given Trello list.
+As soon as the pod gets ready you should see all the Deployments on the cluster reflected on the given Trello list.
 
 ## Releasing a new Version
 
