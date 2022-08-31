@@ -85,7 +85,7 @@ docker-build: test ## Build docker image with the manager.
 	docker buildx build -t ${IMG} $(DOCKER_BUILD_ARGS) $(DOCKER_BUILD_LABELS) .
 
 .PHONY: docker-push
-docker-push: DOCKER_BUILD_ARGS=--push #--platform linux/arm64/v8,linux/amd64
+docker-push: DOCKER_BUILD_ARGS=--push --platform linux/arm64/v8,linux/amd64
 docker-push: docker-build
 
 .PHONY: artifact-push
