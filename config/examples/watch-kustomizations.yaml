@@ -33,18 +33,12 @@ spec:
       kind: ClusterRole
       name: manager-role
   - patch: |-
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: not-used
-      spec:
-        template:
-          spec:
-            containers:
-              - name: manager
-                args:
-                - "--target-api-version=kustomize.toolkit.fluxcd.io/v1beta2"
-                - "--target-kind=Kustomization"
+      - op: add
+        path: /spec/template/spec/containers/1/args/-
+        value: "--target-api-version=kustomize.toolkit.fluxcd.io/v1beta2"
+      - op: add
+        path: /spec/template/spec/containers/1/args/-
+        value: "--target-kind=Kustomization"
     target:
       kind: Deployment
       name: controller-manager
