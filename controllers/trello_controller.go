@@ -20,7 +20,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-var FinalizerName = "trelloctrl.e13.dev/finalizer"
+var (
+	FinalizerName = "trelloctrl.e13.dev/finalizer"
+	StatusIcons   = map[status.Status]string{
+		status.CurrentStatus:     "✅",
+		status.FailedStatus:      "❌",
+		status.NotFoundStatus:    "❌",
+		status.TerminatingStatus: "❌",
+		status.InProgressStatus:  "⌛",
+		status.UnknownStatus:     "⌛",
+	}
+)
 
 type TrelloReconciler struct {
 	httpClient   *retryablehttp.Client
@@ -114,15 +124,10 @@ func (r *TrelloReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, fmt.Errorf("failed checking ready state: %w", err)
 	}
 
-	nameWithoutIndicator := strings.Split(card.Name, " ")[0]
-	switch targetStatus {
-	case status.CurrentStatus:
-		card.Name = nameWithoutIndicator + " ✅"
-	case status.FailedStatus, status.NotFoundStatus, status.TerminatingStatus:
-		card.Name = nameWithoutIndicator + " ❌"
-	case status.InProgressStatus, status.UnknownStatus:
-		card.Name = nameWithoutIndicator + " ⌛"
-	}
+	card.Name = fmt.Sprintf("%s %s",
+		strings.Split(card.Name, " ")[0],
+		StatusIcons[targetStatus],
+	)
 
 	if card.ID != "" {
 		logger.Info("updating card", "card", card.Name)
