@@ -8,6 +8,7 @@ import (
 
 	"github.com/adlio/trello"
 	"github.com/hashicorp/go-retryablehttp"
+	"go.e13.dev/trello-controller/api/v1alpha1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -15,14 +16,17 @@ import (
 	"sigs.k8s.io/cli-utils/pkg/kstatus/status"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 var (
-	FinalizerName = "trelloctrl.e13.dev/finalizer"
-	StatusIcons   = map[status.Status]string{
+	StatusIcons = map[status.Status]string{
 		status.CurrentStatus:     "✅",
 		status.FailedStatus:      "❌",
 		status.NotFoundStatus:    "❌",
@@ -76,9 +80,9 @@ func (r *TrelloReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, fmt.Errorf("failed to query resource: %w", err)
 	}
 
-	if !controllerutil.ContainsFinalizer(obj, FinalizerName) {
+	if !controllerutil.ContainsFinalizer(obj, v1alpha1.FinalizerName) {
 		patch := client.MergeFrom(obj.DeepCopy())
-		controllerutil.AddFinalizer(obj, FinalizerName)
+		controllerutil.AddFinalizer(obj, v1alpha1.FinalizerName)
 		return ctrl.Result{Requeue: true}, r.c.Patch(ctx, obj, patch, client.FieldOwner("notification-agent-controller"))
 	}
 
@@ -107,7 +111,7 @@ func (r *TrelloReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			}
 		}
 		patch := client.MergeFrom(obj.DeepCopy())
-		controllerutil.RemoveFinalizer(obj, FinalizerName)
+		controllerutil.RemoveFinalizer(obj, v1alpha1.FinalizerName)
 		return ctrl.Result{Requeue: true}, r.c.Patch(ctx, obj, patch, client.FieldOwner("notification-agent-controller"))
 	}
 
@@ -171,11 +175,25 @@ func (r *TrelloReconciler) computeStatus(ctx context.Context, n types.Namespaced
 
 }
 
-func (r *TrelloReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *TrelloReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Controller, error) {
 	target := &unstructured.Unstructured{}
 	target.SetGroupVersionKind(r.target.GroupVersionKind())
 
-	return ctrl.NewControllerManagedBy(mgr).
-		For(target).
-		Complete(r)
+	gvk, err := apiutil.GVKForObject(target, mgr.GetScheme())
+	if err != nil {
+		return nil, fmt.Errorf("unable to determine GVK for target: %w", err)
+	}
+
+	c, err := controller.NewUnmanaged(strings.ToLower(gvk.Kind), mgr, controller.Options{
+		Reconciler: r,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("unable to create controller: %w", err)
+	}
+
+	if err := c.Watch(&source.Kind{Type: target}, &handler.EnqueueRequestForObject{}); err != nil {
+		return nil, fmt.Errorf("unable to watch type %q: %w", target, err)
+	}
+
+	return c, nil
 }

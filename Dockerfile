@@ -14,6 +14,7 @@ RUN go mod download
 # Copy the go source
 COPY main.go main.go
 COPY controllers/ controllers/
+COPY api/ api/
 
 # Build
 RUN CGO_ENABLED=0 go build -a -o manager main.go

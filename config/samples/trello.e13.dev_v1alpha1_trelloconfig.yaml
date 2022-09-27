@@ -1,0 +1,25 @@
+apiVersion: trello.e13.dev/v1alpha1
+kind: TrelloConfig
+metadata:
+  name: trelloconfig-sample-pods
+  namespace: default
+spec:
+  target:
+    apiVersion: v1
+    kind: Pod
+  listID: 63343bd97cf50c018fc67f04
+  secretRef:
+    name: trello-credentials
+# ---
+# apiVersion: trello.e13.dev/v1alpha1
+# kind: TrelloConfig
+# metadata:
+#   name: trelloconfig-sample-deployments
+#   namespace: default
+# spec:
+#   target:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#   listID: 630ca6e124ebae02901725d8
+#   secretRef:
+#     name: trello-credentials

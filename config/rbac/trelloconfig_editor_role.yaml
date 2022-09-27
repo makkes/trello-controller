@@ -1,25 +1,24 @@
----
+# permissions for end users to edit trelloconfigs.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
-  name: manager-role
+  name: trelloconfig-editor-role
 rules:
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - get
-  - list
-  - patch
-  - watch
 - apiGroups:
   - trello.e13.dev
   resources:
   - trelloconfigs
   verbs:
+  - create
+  - delete
   - get
   - list
   - patch
+  - update
   - watch
+- apiGroups:
+  - trello.e13.dev
+  resources:
+  - trelloconfigs/status
+  verbs:
+  - get
