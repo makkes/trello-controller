@@ -1,0 +1,15 @@
+domain: e13.dev
+layout:
+- go.kubebuilder.io/v3
+projectName: trello-controller
+repo: github.com/makkes/trello-controller
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: e13.dev
+  group: trello
+  kind: TrelloConfig
+  path: github.com/makkes/trello-controller/api/v1alpha1
+  version: v1alpha1
+version: "3"
